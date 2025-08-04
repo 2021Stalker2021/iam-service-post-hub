@@ -6,7 +6,7 @@ public class ApiUtils {
 
     public static String getMethodName() {
         try {
-            return Thread.currentThread().getStackTrace()[1].getMethodName();
+            return Thread.currentThread().getStackTrace()[2].getMethodName();
             // [1] getMethodName() метод, который вызвал текущий
         } catch (Exception cause) {
             return ApiConstants.UNDEFINED;
