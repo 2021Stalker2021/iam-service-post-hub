@@ -1,14 +1,19 @@
 package com.post_hub.iam_service.advice;
 
 import com.post_hub.iam_service.model.constants.ApiConstants;
+import com.post_hub.iam_service.model.exception.DataExistException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 @Slf4j
@@ -23,6 +28,29 @@ public class CommonControllerAdvice {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(ex.getMessage());
+    }
+
+    @ExceptionHandler(DataExistException.class)
+    @ResponseBody // указываем, для того чтобы вернуть тело ответа
+    protected ResponseEntity<String> handleDataExistException(DataExistException ex) {
+        logStackTrace(ex);
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT) // 409
+                .body(ex.getMessage());
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, String>> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+        logStackTrace(ex);
+
+        Map<String, String> errors = new HashMap<>();
+        for (ObjectError error : ex.getBindingResult().getAllErrors()) {
+            String errorMessage = error.getDefaultMessage();
+            errors.put("error", errorMessage);
+        }
+
+        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST); // 400
     }
 
     private void logStackTrace(Exception ex) {
