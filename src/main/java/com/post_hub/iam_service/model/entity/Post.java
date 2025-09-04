@@ -26,6 +26,9 @@ public class Post {
     // если запись уже создана, время уже никогда не поменяется
     private LocalDateTime created = LocalDateTime.now();
 
+    @Column(nullable = false)
+    private LocalDateTime updated = LocalDateTime.now();
+
     @Column(nullable = false, columnDefinition = "integer default 0")
     private Integer likes = 0;
 }
