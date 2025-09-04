@@ -31,5 +31,5 @@ public interface PostMapper {
 
     @Mapping(target = "id", ignore = true) // игнорируем поле т.к. оно будет сгенерировано базой данных
     @Mapping(target = "created", ignore = true) // игнорируем поле т.к. оно будет сгенерировано базой данных
-    Post updatePost(@MappingTarget Post post, UpdatePostRequest request);
+    void updatePost(@MappingTarget Post post, UpdatePostRequest request);
 }
