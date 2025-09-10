@@ -3,16 +3,20 @@ package com.post_hub.iam_service.service.impl;
 import com.post_hub.iam_service.mapper.PostMapper;
 import com.post_hub.iam_service.model.constants.ApiErrorMessage;
 import com.post_hub.iam_service.model.dto.post.PostDTO;
+import com.post_hub.iam_service.model.dto.post.PostSearchDTO;
 import com.post_hub.iam_service.model.entity.Post;
 import com.post_hub.iam_service.model.exception.DataExistException;
 import com.post_hub.iam_service.model.exception.NotFoundException;
 import com.post_hub.iam_service.model.request.post.NewPostRequest;
 import com.post_hub.iam_service.model.request.post.UpdatePostRequest;
 import com.post_hub.iam_service.model.response.IamResponse;
+import com.post_hub.iam_service.model.response.PaginationResponse;
 import com.post_hub.iam_service.repository.PostRepository;
 import com.post_hub.iam_service.service.PostService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -67,5 +71,23 @@ public class PostServiceImpl implements PostService {
 
         post.setDeleted(true);
         postRepository.save(post);
+    }
+
+    @Override
+    public IamResponse<PaginationResponse<PostSearchDTO>> findAllPosts(Pageable pageable) {
+        Page<PostSearchDTO> posts = postRepository.findAll(pageable)
+                .map(postMapper::toPostSearchDTO);
+
+        PaginationResponse<PostSearchDTO> paginationResponse = new PaginationResponse<>(
+                posts.getContent(),
+                new PaginationResponse.Pagination(
+                        posts.getTotalElements(), // Общее количество элементов во всех страницах
+                        pageable.getPageSize(), // Количество элементов на одной странице (размер страницы)
+                        pageable.getPageNumber() + 1, // Текущий номер страницы (нумерация с 1)
+                        posts.getTotalPages() // Общее количество страниц
+                )
+        );
+
+        return IamResponse.createSuccessful(paginationResponse);
     }
 }
