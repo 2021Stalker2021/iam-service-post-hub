@@ -2,6 +2,7 @@ package com.post_hub.iam_service.controller;
 
 import com.post_hub.iam_service.model.constants.ApiLogMessage;
 import com.post_hub.iam_service.model.dto.user.UserDto;
+import com.post_hub.iam_service.model.request.user.NewUserRequest;
 import com.post_hub.iam_service.model.response.IamResponse;
 import com.post_hub.iam_service.service.UserService;
 import com.post_hub.iam_service.utils.ApiUtils;
@@ -24,6 +25,15 @@ public class UserController {
         log.trace(ApiLogMessage.NAME_OF_CURRENT_METHOD.getValue(), ApiUtils.getMethodName());
 
         IamResponse<UserDto> response = userService.getById(id);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<IamResponse<UserDto>> createUser(@Validated @RequestBody NewUserRequest request) {
+        log.trace(ApiLogMessage.NAME_OF_CURRENT_METHOD.getValue(), ApiUtils.getMethodName());
+
+
+        IamResponse<UserDto> response = userService.createUser(request);
         return ResponseEntity.ok(response);
     }
 }

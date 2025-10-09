@@ -31,10 +31,10 @@ public class User {
     private String email;
 
     @Column(nullable = false)
-    private LocalDateTime created;
+    private LocalDateTime created = LocalDateTime.now(); // при создании будет сразу сохранятся время
 
     @Column(nullable = false)
-    private LocalDateTime updated;
+    private LocalDateTime updated = LocalDateTime.now(); // при создании будет сразу сохранятся время
 
     @Column()
     private LocalDateTime last_login;
