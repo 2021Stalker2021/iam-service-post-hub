@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -45,4 +46,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(name = "registration_status", nullable = false)
     private RegistrationStatus registrationStatus;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Post> posts;
 }
