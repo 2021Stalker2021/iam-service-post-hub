@@ -26,6 +26,7 @@ public interface PostMapper {
     @Mapping(target = "id", ignore = true) // игнорируем поле т.к. оно будет сгенерировано базой данных
     @Mapping(target = "created", ignore = true) // игнорируем поле т.к. оно будет сгенерировано базой данных
     @Mapping(target = "user", source = "user")
+    @Mapping(target = "createdBy", source = "user.username")
     Post createPost(NewPostRequest newPostRequest, User user);
 
     @Mapping(target = "id", ignore = true) // игнорируем поле т.к. оно будет сгенерировано базой данных
@@ -34,5 +35,6 @@ public interface PostMapper {
 
 
     @Mapping(source = "deleted", target = "isDeleted")
+    @Mapping(target = "createdBy", source = "user.username") // поле в сущности Post
     PostSearchDTO toPostSearchDTO(Post post);
 }
