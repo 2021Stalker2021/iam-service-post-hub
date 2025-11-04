@@ -27,9 +27,9 @@ CREATE TABLE posts
 );
 
 INSERT INTO users (username, password, email, created, updated, registration_status, last_login, deleted) VALUES
-                        ('first_user', 'password1', 'first_user@gmail.com', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'ACTIVE', CURRENT_TIMESTAMP, false),
-                        ('second_user', 'password2', 'second_user@gmail.com', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'ACTIVE', CURRENT_TIMESTAMP, false),
-                        ('third_user', 'password3', 'third_user@gmail.com', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'ACTIVE', CURRENT_TIMESTAMP, false);
+                        ('first_user', '$2a$10$hinjZ1dDfRr2wO4ZCSJRNOl4a3CzdLzx5K/bCdowxMMcLjE6zLg0m', 'first_user@gmail.com', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'ACTIVE', CURRENT_TIMESTAMP, false),
+                        ('second_user', '$2a$10$qtIX985Dui2qs0me/yjRKuCz7obiSdwiD.VArgKfcEsFMkCooD3Qa', 'second_user@gmail.com', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'ACTIVE', CURRENT_TIMESTAMP, false),
+                        ('third_user', '$2a$10$hTmyfkxY39.NlO/6JW3BtuykHLc/0/mMplYlh63YeHxfrebx0DgSy', 'third_user@gmail.com', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'ACTIVE', CURRENT_TIMESTAMP, false);
 
 INSERT INTO posts (user_id, title, content, created, updated, deleted, likes) VALUES
                         (1, 'First post', 'This is content of the first post', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, false, 6),

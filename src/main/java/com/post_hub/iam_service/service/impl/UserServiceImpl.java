@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -30,6 +31,7 @@ import java.time.LocalDateTime;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public IamResponse<UserDTO> getById(@NotNull Long userId) {
@@ -41,15 +43,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public IamResponse<UserDTO> createUser(@NotNull NewUserRequest newUserRequest) {
-        if (userRepository.existsByUsername(newUserRequest.getUsername())) {
-            throw new DataExistException(ApiErrorMessage.USERNAME_ALREADY_EXISTS.getMessage(newUserRequest.getUsername()));
+    public IamResponse<UserDTO> createUser(@NotNull NewUserRequest request) {
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new DataExistException(ApiErrorMessage.USERNAME_ALREADY_EXISTS.getMessage(request.getUsername()));
         }
-        if (userRepository.existsByEmail(newUserRequest.getEmail())) {
-            throw new DataExistException(ApiErrorMessage.EMAIL_ALREADY_EXISTS.getMessage(newUserRequest.getEmail()));
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new DataExistException(ApiErrorMessage.EMAIL_ALREADY_EXISTS.getMessage(request.getEmail()));
         }
 
-        User user = userMapper.createUser(newUserRequest);
+        User user = userMapper.createUser(request);
+        user.setPassword(passwordEncoder.encode(request.getPassword())); // в базе теперь будет зашиврованый пароль
         User savedUser = userRepository.save(user);
         UserDTO userDto = userMapper.toUserDTO(savedUser);
 
