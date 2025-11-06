@@ -6,7 +6,10 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -53,4 +56,12 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> posts;
+
+    @ManyToMany()
+    @JoinTable(
+            name = "user_roles", // связующая таблица
+            joinColumns = @JoinColumn(name = "user_id"), // Столбец, который ссылается на текущую сущность (User)
+            inverseJoinColumns = @JoinColumn(name = "role_id") // Столбец, который ссылается на связанную сущность (Role)
+    )
+    private Collection<Role> roles;
 }
