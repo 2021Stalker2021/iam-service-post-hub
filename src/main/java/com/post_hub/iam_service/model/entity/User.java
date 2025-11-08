@@ -44,8 +44,8 @@ public class User {
     @Column(nullable = false)
     private LocalDateTime updated = LocalDateTime.now(); // при создании будет сразу сохранятся время
 
-    @Column()
-    private LocalDateTime last_login;
+    @Column(name = "last_login")
+    private LocalDateTime lastLogin;
 
     @Column(nullable = false)
     private Boolean deleted = false;

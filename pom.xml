@@ -78,6 +78,32 @@
 			<version>0.2.0</version>
 			<scope>provided</scope>
 		</dependency>
+
+		<!-- JJWT API - содержит интерфейсы и классы API для работы с JWT -->
+		<!-- Определяет контракты и абстракции для создания и верификации токенов -->
+		<!-- Используется во время компиляции, реализация предоставляется jjwt-impl -->
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<version>0.11.5</version>
+		</dependency>
+		<!-- JJWT Implementation - основная реализация функциональности JWT -->
+		<!-- Содержит ключевые классы для создания и разбора JWT токенов -->
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>0.11.5</version>
+			<scope>runtime</scope>
+		</dependency>
+		<!-- JJWT Jackson - интеграция с Jackson для сериализации/десериализации -->
+		<!-- Обеспечивает преобразование JSON в объекты Java и обратно -->
+		<!-- Используется для работы с claims (утверждениями) в JWT токенах -->
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId>
+			<version>0.11.5</version>
+			<scope>runtime</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
