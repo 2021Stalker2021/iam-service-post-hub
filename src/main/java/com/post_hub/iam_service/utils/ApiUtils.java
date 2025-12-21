@@ -20,11 +20,11 @@ public class ApiUtils {
     }
 
     public static Cookie createAuthCookie(String value) {
-        Cookie authorizationCookie = new Cookie(HttpHeaders.AUTHORIZATION, value);
-        authorizationCookie.setHttpOnly(true);
-        authorizationCookie.setSecure(true);
-        authorizationCookie.setPath("/");
-        authorizationCookie.setMaxAge(300);
+        Cookie authorizationCookie = new Cookie(HttpHeaders.AUTHORIZATION, value); // Имя куки и значение
+        authorizationCookie.setHttpOnly(true); // Защита от XSS-атак
+        authorizationCookie.setSecure(true); // Только по HTTPS
+        authorizationCookie.setPath("/"); // Доступно для всех путей
+        authorizationCookie.setMaxAge(300); // Время жизни
         return authorizationCookie;
     }
 
