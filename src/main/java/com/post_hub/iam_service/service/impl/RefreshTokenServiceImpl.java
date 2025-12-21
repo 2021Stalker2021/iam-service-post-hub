@@ -36,6 +36,9 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
                 });
     }
 
+    /*
+    Метод ищет refreshToken в базе, при успешном поиске обновляет его и сохраняет в БД
+     */
     @Override
     public RefreshToken validateAndRefreshToken(String requestRefreshToken) {
         RefreshToken refreshToken = refreshTokenRepository.findByToken(requestRefreshToken)

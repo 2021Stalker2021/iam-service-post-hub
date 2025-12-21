@@ -1,7 +1,6 @@
 package com.post_hub.iam_service.model.dto.user;
 
 import com.post_hub.iam_service.model.dto.role.RoleDTO;
-import com.post_hub.iam_service.model.entity.Role;
 import com.post_hub.iam_service.model.enums.RegistrationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;

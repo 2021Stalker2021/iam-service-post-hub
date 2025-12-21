@@ -2,8 +2,7 @@ package com.post_hub.iam_service.service.impl;
 
 import com.post_hub.iam_service.mapper.UserMapper;
 import com.post_hub.iam_service.model.constants.ApiErrorMessage;
-import com.post_hub.iam_service.model.constants.ApiMessage;
-import com.post_hub.iam_service.model.dto.user.LoginRequest;
+import com.post_hub.iam_service.model.request.user.LoginRequest;
 import com.post_hub.iam_service.model.dto.user.UserProfileDTO;
 import com.post_hub.iam_service.model.entity.RefreshToken;
 import com.post_hub.iam_service.model.entity.User;
@@ -15,7 +14,6 @@ import com.post_hub.iam_service.service.AuthService;
 import com.post_hub.iam_service.service.RefreshTokenService;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -46,7 +44,7 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new InvalidDataException(ApiErrorMessage.INVALID_USER_OR_PASSWORD.getMessage()));
 
         RefreshToken refreshToken = refreshTokenService.generateOrUpdateRefreshToken(user);
-        String token = jwtTokenProvider.generateToken(user); // создание токена для пользователя
+        String token = jwtTokenProvider.generateToken(user);
         UserProfileDTO userProfileDTO = userMapper.toUserProfileDto(user, token, refreshToken.getToken());
         userProfileDTO.setToken(token);
 
@@ -64,4 +62,5 @@ public class AuthServiceImpl implements AuthService {
                 userMapper.toUserProfileDto(user, accessToken, refreshToken.getToken())
         );
     }
+
 }
