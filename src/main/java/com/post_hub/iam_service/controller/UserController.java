@@ -64,7 +64,7 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/search")
+    @PostMapping("/all")
     public ResponseEntity<IamResponse<PaginationResponse<UserSearchDTO>>> searchUsers(
             @RequestBody @Valid UserSearchRequest request,
             @RequestParam(name = "page", defaultValue = "0") int page,
