@@ -44,16 +44,18 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public IamResponse<PostDTO> createPost(@NotNull Long userId, NewPostRequest newPostRequest) {
+    public IamResponse<PostDTO> createPost(@NotNull NewPostRequest request, String username) {
 
-        if (postRepository.existsByTitle(newPostRequest.getTitle())) { // если пост существует выбрасываем exception
-            throw new DataExistException(ApiErrorMessage.POST_ALREADY_EXISTS.getMessage(newPostRequest.getTitle()));
+        if (postRepository.existsByTitle(request.getTitle())) { // если пост существует выбрасываем exception
+            throw new DataExistException(ApiErrorMessage.POST_ALREADY_EXISTS.getMessage(request.getTitle()));
         }
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(ApiErrorMessage.POST_NOT_FOUND_BY_ID.getMessage(userId)));
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException(ApiErrorMessage.USERNAME_NOT_FOUND.getMessage(username)));
 
-        Post post = postMapper.createPost(newPostRequest, user);
+        Post post = postMapper.createPost(request);
+        post.setUser(user); // установка user в post
+        post.setCreatedBy(username); // какой user создал пост
         Post savedPost = postRepository.save(post);
         PostDTO postDTO = postMapper.toPostDTO(savedPost);
 

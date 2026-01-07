@@ -72,10 +72,10 @@ public class JwtTokenProvider {
         }
     }
 
-    // Метод для получения email из токена
-    public String getEmail(String token) {
-        // Subject токена - это email пользователя
-        return getAllClaimsFromToken(token).getSubject();
+    // Метод для получения username из токена
+    public String getUsername(String token) {
+        Claims claims = getAllClaimsFromToken(token);
+        return claims.get(AuthenticationConstants.USERNAME, String.class);
     }
 
     // Метод для получения списка ролей из токена

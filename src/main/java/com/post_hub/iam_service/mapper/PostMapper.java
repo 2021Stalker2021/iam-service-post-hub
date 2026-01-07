@@ -25,9 +25,7 @@ public interface PostMapper {
 
     @Mapping(target = "id", ignore = true) // игнорируем поле т.к. оно будет сгенерировано базой данных
     @Mapping(target = "created", ignore = true) // игнорируем поле т.к. оно будет сгенерировано базой данных
-    @Mapping(target = "user", source = "user")
-    @Mapping(target = "createdBy", source = "user.username")
-    Post createPost(NewPostRequest newPostRequest, User user);
+    Post createPost(NewPostRequest request);
 
     @Mapping(target = "id", ignore = true) // игнорируем поле т.к. оно будет сгенерировано базой данных
     @Mapping(target = "created", ignore = true) // игнорируем поле т.к. оно будет сгенерировано базой данных

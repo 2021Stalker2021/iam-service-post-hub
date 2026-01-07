@@ -53,6 +53,7 @@ public class AuthServiceImpl implements AuthService {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
             );
+            // далее используется DaoAuthenticationProvider из SecurityConfig
         } catch (BadCredentialsException e) {
             throw new InvalidDataException(ApiErrorMessage.INVALID_USER_OR_PASSWORD.getMessage());
         }
