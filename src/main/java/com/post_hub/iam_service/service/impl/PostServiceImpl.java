@@ -16,6 +16,7 @@ import com.post_hub.iam_service.model.response.PaginationResponse;
 import com.post_hub.iam_service.repository.PostRepository;
 import com.post_hub.iam_service.repository.UserRepository;
 import com.post_hub.iam_service.repository.criteria.PostSearchCriteria;
+import com.post_hub.iam_service.security.validation.AccessValidator;
 import com.post_hub.iam_service.service.PostService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final PostMapper postMapper;
+    private final AccessValidator accessValidator;
 
     @Override
     public IamResponse<PostDTO> getById(@NotNull Integer postId) {
@@ -67,6 +69,12 @@ public class PostServiceImpl implements PostService {
         Post post = postRepository.findByIdAndDeletedFalse(postId)
                 .orElseThrow(() -> new NotFoundException(ApiErrorMessage.POST_NOT_FOUND_BY_ID.getMessage(postId)));
 
+        accessValidator.validateAdminOrOwnerAccess(post.getUser().getUsername(), post.getCreatedBy());
+
+        if (postRepository.existsByTitle(request.getTitle())) { // если пост существует выбрасываем exception
+            throw new DataExistException(ApiErrorMessage.POST_ALREADY_EXISTS.getMessage(request.getTitle()));
+        }
+
         postMapper.updatePost(post, request);
         post.setUpdated(LocalDateTime.now());
         post = postRepository.save(post);
@@ -79,6 +87,8 @@ public class PostServiceImpl implements PostService {
     public void softDeletePost(Integer postId) {
         Post post = postRepository.findByIdAndDeletedFalse(postId)
                 .orElseThrow(() -> new NotFoundException(ApiErrorMessage.POST_NOT_FOUND_BY_ID.getMessage(postId)));
+
+        accessValidator.validateAdminOrOwnerAccess(post.getUser().getUsername(), post.getCreatedBy());
 
         post.setDeleted(true);
         postRepository.save(post);
