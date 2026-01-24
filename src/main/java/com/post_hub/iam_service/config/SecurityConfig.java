@@ -1,7 +1,9 @@
 package com.post_hub.iam_service.config;
 
 import com.post_hub.iam_service.security.filter.JwtRequestFilter;
+import com.post_hub.iam_service.security.handler.AccessRestrictionHandler;
 import com.post_hub.iam_service.service.UserService;
+import com.post_hub.iam_service.service.model.IamServiceUserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +21,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -26,6 +29,7 @@ import org.springframework.security.web.servlet.util.matcher.PathPatternRequestM
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final JwtRequestFilter jwtRequestFilter;
+    private final AccessRestrictionHandler accessRestrictionHandler;
 
     private static final PathPatternRequestMatcher[] NOT_SECURED_URLS = new PathPatternRequestMatcher[] {
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/auth/login"),
@@ -40,10 +44,16 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(NOT_SECURED_URLS).permitAll()
+
+//                        .requestMatchers(get("/users/all")).hasAnyAuthority(adminAccessSecurityRoles())
+//                        .requestMatchers(get("/posts/all")).hasAnyAuthority(adminAccessSecurityRoles())
+                        .requestMatchers(post("/users/create")).hasAnyAuthority(adminAccessSecurityRoles())
+
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                        .accessDeniedHandler(accessRestrictionHandler)
                 )
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -66,5 +76,23 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
+    }
+
+
+    private String[] adminAccessSecurityRoles() {
+        // этот метод возвращает список ролей, к которым разрешен доступ к админским endpoint-ам
+        return new String[] {
+                IamServiceUserRole.SUPER_ADMIN.name(),
+                IamServiceUserRole.ADMIN.name(),
+        };
+    }
+
+    // Метод который, принимает путь к ресурсу
+    private static RequestMatcher get(String pattern) {
+        return PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, pattern);
+    }
+
+    private static RequestMatcher post(String pattern) {
+        return PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, pattern);
     }
 }
