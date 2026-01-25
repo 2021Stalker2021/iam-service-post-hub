@@ -78,6 +78,11 @@ public class JwtTokenProvider {
         return claims.get(AuthenticationConstants.USERNAME, String.class);
     }
 
+    public String getUserId(String token) {
+        Claims claims = getAllClaimsFromToken(token);
+        return String.valueOf(claims.get(AuthenticationConstants.USER_ID));
+    }
+
     // Метод для получения списка ролей из токена
     public List<String> getRoles(String token) {
         // Достаем роли из claims токена

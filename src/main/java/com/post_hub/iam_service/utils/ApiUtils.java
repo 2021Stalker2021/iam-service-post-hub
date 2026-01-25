@@ -1,15 +1,20 @@
 package com.post_hub.iam_service.utils;
 
 import com.post_hub.iam_service.model.constants.ApiConstants;
+import com.post_hub.iam_service.security.JwtTokenProvider;
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
+@Component
+@RequiredArgsConstructor
 public class ApiUtils {
+    private final JwtTokenProvider jwtTokenProvider;
 
     public static String getMethodName() {
         try {
@@ -36,5 +41,10 @@ public class ApiUtils {
 
     public static String getCurrentUsername() {
         return SecurityContextHolder.getContext().getAuthentication().getName();
+    }
+
+    public Long getUserIdFromAuthentication() {
+        String jwtToken = SecurityContextHolder.getContext().getAuthentication().getCredentials().toString();
+        return Long.parseLong(jwtTokenProvider.getUserId(jwtToken));
     }
 }
