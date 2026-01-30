@@ -3,6 +3,7 @@ package com.post_hub.iam_service.service;
 import com.post_hub.iam_service.model.dto.comment.CommentDTO;
 import com.post_hub.iam_service.model.dto.comment.CommentSearchDTO;
 import com.post_hub.iam_service.model.request.comment.CommentRequest;
+import com.post_hub.iam_service.model.request.comment.CommentSearchRequest;
 import com.post_hub.iam_service.model.request.comment.UpdateCommentRequest;
 import com.post_hub.iam_service.model.response.IamResponse;
 import com.post_hub.iam_service.model.response.PaginationResponse;
@@ -21,4 +22,5 @@ public interface CommentService {
 
     IamResponse<PaginationResponse<CommentSearchDTO>> findAllComments(Pageable pageable);
 
+    IamResponse<PaginationResponse<CommentSearchDTO>> searchComments(@NotNull CommentSearchRequest request, Pageable pageable);
 }
