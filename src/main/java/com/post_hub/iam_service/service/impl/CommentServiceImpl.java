@@ -18,6 +18,7 @@ import com.post_hub.iam_service.repository.CommentRepository;
 import com.post_hub.iam_service.repository.PostRepository;
 import com.post_hub.iam_service.repository.UserRepository;
 import com.post_hub.iam_service.repository.criteria.CommentSearchCriteria;
+import com.post_hub.iam_service.security.validation.AccessValidator;
 import com.post_hub.iam_service.service.CommentService;
 import com.post_hub.iam_service.utils.ApiUtils;
 import jakarta.validation.constraints.NotNull;
@@ -39,6 +40,7 @@ public class CommentServiceImpl implements CommentService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final PostMapper postMapper;
+    private final AccessValidator accessValidator;
 
     @Override
     public IamResponse<CommentDTO> getCommentById(@NotNull Integer commentId) {
@@ -69,6 +71,8 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = commentRepository.findByIdAndDeletedFalse(commentId)
                 .orElseThrow(() -> new NotFoundException(ApiErrorMessage.COMMENT_NOT_FOUND_BY_ID.getMessage(commentId)));
 
+        accessValidator.validateAdminOrOwnerAccess(comment.getUser().getId());
+
         if (request.getPostId() != null) {
             Post post = postRepository.findByIdAndDeletedFalse(request.getPostId())
                     .orElseThrow(() -> new NotFoundException(ApiErrorMessage.POST_NOT_FOUND_BY_ID.getMessage(request.getPostId())));
@@ -85,6 +89,8 @@ public class CommentServiceImpl implements CommentService {
     public void softDelete(@NotNull Integer commentId) {
         Comment comment = commentRepository.findByIdAndDeletedFalse(commentId)
                 .orElseThrow(() -> new NotFoundException(ApiErrorMessage.COMMENT_NOT_FOUND_BY_ID.getMessage(commentId)));
+
+        accessValidator.validateAdminOrOwnerAccess(comment.getUser().getId());
 
         comment.setDeleted(true);
         commentRepository.save(comment);
