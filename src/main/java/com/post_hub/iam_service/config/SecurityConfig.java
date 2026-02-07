@@ -35,6 +35,11 @@ public class SecurityConfig {
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/auth/login"),
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/auth/register"),
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/auth/refresh/token"),
+
+            PathPatternRequestMatcher.withDefaults().matcher("/v3/api-docs/**"),
+            PathPatternRequestMatcher.withDefaults().matcher("/swagger-ui/**"),
+            PathPatternRequestMatcher.withDefaults().matcher("/swagger-ui.html"),
+            PathPatternRequestMatcher.withDefaults().matcher("/webjars/**")
     };
 
     @Bean
