@@ -47,7 +47,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public IamResponse<UserDTO> getById(@NotNull Long userId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdAndDeletedFalse(userId)
                 .orElseThrow(() -> new NotFoundException(ApiErrorMessage.USER_NOT_FOUND_BY_ID.getMessage(userId)));
 
         UserDTO userDTO = userMapper.toUserDTO(user);
