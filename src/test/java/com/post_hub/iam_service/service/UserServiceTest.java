@@ -4,7 +4,9 @@ import com.post_hub.iam_service.mapper.UserMapper;
 import com.post_hub.iam_service.model.dto.user.UserDTO;
 import com.post_hub.iam_service.model.entity.Role;
 import com.post_hub.iam_service.model.entity.User;
+import com.post_hub.iam_service.model.exception.DataExistException;
 import com.post_hub.iam_service.model.exception.NotFoundException;
+import com.post_hub.iam_service.model.request.user.NewUserRequest;
 import com.post_hub.iam_service.repository.RoleRepository;
 import com.post_hub.iam_service.repository.UserRepository;
 import com.post_hub.iam_service.service.impl.UserServiceImpl;
@@ -18,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
@@ -52,7 +55,7 @@ public class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        Role superAdminRole = new Role();
+        superAdminRole = new Role();
         superAdminRole.setName(IamServiceUserRole.SUPER_ADMIN.getRole());
 
         testUser = new User();
@@ -94,5 +97,53 @@ public class UserServiceTest {
 
         verify(userRepository, times(1)).findByIdAndDeletedFalse(999L);
         verify(userMapper, times(0)).toUserDTO(testUser);
+    }
+
+    @Test
+    void createUser_AsSuperAdmin_CreatesUserSuccessfully() {
+        NewUserRequest request = new NewUserRequest("New User", "password123!", "newuser@gmail.com");
+
+        when(userRepository.existsByEmail(request.getEmail())).thenReturn(false);
+        when(userRepository.existsByUsername(request.getUsername())).thenReturn(false);
+        when(roleRepository.findByName(IamServiceUserRole.USER.getRole())).thenReturn(Optional.of(superAdminRole));
+
+        User newUser = new User();
+        newUser.setUsername(request.getUsername());
+        newUser.setEmail(request.getEmail());
+        newUser.setPassword(request.getPassword());
+        newUser.setRoles(Collections.singleton(superAdminRole));
+
+        when(userMapper.createUser(request)).thenReturn(newUser);
+
+        when(passwordEncoder.encode(request.getPassword())).thenReturn("encodedPassword");
+        when(userRepository.save(any(User.class))).thenReturn(newUser);
+        when(userMapper.toUserDTO(newUser)).thenReturn(testUserDTO);
+
+
+        UserDTO result = userService.createUser(request).getPayload();
+
+        assertNotNull(result);
+        assertEquals(testUserDTO.getId(), result.getId());
+        assertEquals(testUserDTO.getUsername(), result.getUsername());
+
+        verify(userRepository, times(1)).existsByEmail(request.getEmail());
+        verify(userRepository, times(1)).existsByUsername(request.getUsername());
+        verify(userRepository, times(1)).save(newUser);
+        verify(userMapper, times(1)).toUserDTO(newUser);
+    }
+
+    @Test
+    void createUser_EmailAlreadyExists_ThrowsException() {
+        NewUserRequest request = new NewUserRequest("New User", "password123!", "newuser@gmail.com");
+
+        when(userRepository.existsByEmail(request.getEmail())).thenReturn(true);
+
+        assertThatThrownBy(() -> userService.createUser(request))
+                .isInstanceOf(DataExistException.class)
+                .hasMessageContaining("already exists");
+
+        verify(userRepository, times(1)).existsByEmail(request.getEmail());
+        verify(userRepository, never()).existsByUsername(anyString());
+        verify(userRepository, never()).save(any(User.class));
     }
 }
