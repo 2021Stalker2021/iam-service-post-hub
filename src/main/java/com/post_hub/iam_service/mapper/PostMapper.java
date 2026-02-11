@@ -23,9 +23,13 @@ public interface PostMapper {
 
     PostDTO toPostDTO(Post post);
 
-    @Mapping(target = "id", ignore = true) // игнорируем поле т.к. оно будет сгенерировано базой данных
-    @Mapping(target = "created", ignore = true) // игнорируем поле т.к. оно будет сгенерировано базой данных
-    Post createPost(NewPostRequest request);
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "created", ignore = true)
+    @Mapping(target = "updated", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
+    @Mapping(source = "user", target = "user")
+    @Mapping(source = "createdBy", target = "createdBy")
+    Post createPost(NewPostRequest newPostRequest, User user, String createdBy);
 
     @Mapping(target = "id", ignore = true) // игнорируем поле т.к. оно будет сгенерировано базой данных
     @Mapping(target = "created", ignore = true) // игнорируем поле т.к. оно будет сгенерировано базой данных

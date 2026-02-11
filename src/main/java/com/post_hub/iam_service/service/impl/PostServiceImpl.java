@@ -18,11 +18,13 @@ import com.post_hub.iam_service.repository.UserRepository;
 import com.post_hub.iam_service.repository.criteria.PostSearchCriteria;
 import com.post_hub.iam_service.security.validation.AccessValidator;
 import com.post_hub.iam_service.service.PostService;
+import com.post_hub.iam_service.utils.ApiUtils;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -34,6 +36,7 @@ public class PostServiceImpl implements PostService {
     private final UserRepository userRepository;
     private final PostMapper postMapper;
     private final AccessValidator accessValidator;
+    private final ApiUtils apiUtils;
 
     @Override
     public IamResponse<PostDTO> getById(@NotNull Integer postId) {
@@ -46,22 +49,19 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public IamResponse<PostDTO> createPost(@NotNull NewPostRequest request, String username) {
-
-        if (postRepository.existsByTitle(request.getTitle())) { // если пост существует выбрасываем exception
-            throw new DataExistException(ApiErrorMessage.POST_ALREADY_EXISTS.getMessage(request.getTitle()));
+    public IamResponse<PostDTO> createPost(@NotNull NewPostRequest postRequest) {
+        if (postRepository.existsByTitle(postRequest.getTitle())) { // если пост существует выбрасываем exception
+            throw new DataExistException(ApiErrorMessage.POST_ALREADY_EXISTS.getMessage(postRequest.getTitle()));
         }
 
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new NotFoundException(ApiErrorMessage.USERNAME_NOT_FOUND.getMessage(username)));
+        Long userId = apiUtils.getUserIdFromAuthentication();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException(ApiErrorMessage.USERNAME_NOT_FOUND.getMessage(userId)));
 
-        Post post = postMapper.createPost(request);
-        post.setUser(user); // установка user в post
-        post.setCreatedBy(username); // какой user создал пост
-        Post savedPost = postRepository.save(post);
-        PostDTO postDTO = postMapper.toPostDTO(savedPost);
+        Post post = postMapper.createPost(postRequest, user, user.getUsername());
+        post = postRepository.save(post);
 
-        return IamResponse.createSuccessful(postDTO);
+        return IamResponse.createSuccessful(postMapper.toPostDTO(post));
     }
 
     @Override

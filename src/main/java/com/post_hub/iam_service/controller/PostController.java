@@ -19,8 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
-
 @Slf4j
 @RestController
 @Validated // для валидации входных параметров
@@ -39,11 +37,11 @@ public class PostController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<IamResponse<PostDTO>> createPost(@RequestBody @Valid NewPostRequest request, Principal principal) {
+    public ResponseEntity<IamResponse<PostDTO>> createPost(@RequestBody @Valid NewPostRequest request) {
         // Principal содержит username текущего пользователя
         log.trace(ApiLogMessage.NAME_OF_CURRENT_METHOD.getValue(), ApiUtils.getMethodName());
 
-        IamResponse<PostDTO> response = postService.createPost(request, principal.getName());
+        IamResponse<PostDTO> response = postService.createPost(request);
         return ResponseEntity.ok(response);
     }
 

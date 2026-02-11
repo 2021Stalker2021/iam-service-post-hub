@@ -18,5 +18,5 @@ public class NewPostRequest implements Serializable {
     @NotBlank(message = "Content cannot be empty")
     private String content;
     @NotNull(message = "Specify the number of likes")
-    private String likes;
+    private Integer likes;
 }
