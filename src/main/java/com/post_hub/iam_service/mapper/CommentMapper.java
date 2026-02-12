@@ -34,7 +34,7 @@ public interface CommentMapper {
     @Mapping(target = "user", source = "user")
     @Mapping(target = "post", source = "post")
     @Mapping(target = "createdBy", source = "user.email")
-    Comment toEntity(CommentRequest commentRequest, User user, Post post);
+    Comment createComment(CommentRequest commentRequest, User user, Post post);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "created", ignore = true)
