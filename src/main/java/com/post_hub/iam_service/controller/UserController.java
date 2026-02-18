@@ -10,6 +10,7 @@ import com.post_hub.iam_service.model.response.IamResponse;
 import com.post_hub.iam_service.model.response.PaginationResponse;
 import com.post_hub.iam_service.service.UserService;
 import com.post_hub.iam_service.utils.ApiUtils;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -64,7 +65,19 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/all")
+    @GetMapping("/all")
+    @Operation(summary = "Get all Users", description = "Retrieves a paginated list of all registered users")
+    public ResponseEntity<IamResponse<PaginationResponse<UserSearchDTO>>> getAllUsers(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "limit", defaultValue = "10") int limit) {
+        log.trace(ApiLogMessage.NAME_OF_CURRENT_METHOD.getValue(), ApiUtils.getMethodName());
+
+        Pageable pageable = PageRequest.of(page, limit);
+        IamResponse<PaginationResponse<UserSearchDTO>> response = userService.findAllUsers(pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/search")
     public ResponseEntity<IamResponse<PaginationResponse<UserSearchDTO>>> searchUsers(
             @RequestBody @Valid UserSearchRequest request,
             @RequestParam(name = "page", defaultValue = "0") int page,

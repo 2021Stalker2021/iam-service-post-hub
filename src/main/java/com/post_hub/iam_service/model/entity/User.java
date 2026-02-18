@@ -3,13 +3,13 @@ package com.post_hub.iam_service.model.entity;
 import com.post_hub.iam_service.model.enums.RegistrationStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -57,7 +57,7 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> posts;
 
-    @ManyToMany()
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles", // связующая таблица
             joinColumns = @JoinColumn(name = "user_id"), // Столбец, который ссылается на текущую сущность (User)
