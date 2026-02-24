@@ -23,19 +23,21 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
-@Configuration
-@EnableWebSecurity
-@EnableMethodSecurity
-@RequiredArgsConstructor
+@Configuration // Помечает класс как источник конфигурации Spring-бинов
+@EnableWebSecurity // Включает поддержку веб-безопасности Spring Security
+@EnableMethodSecurity // Включает безопасность на уровне методов (@PreAuthorize и т.д.)
+@RequiredArgsConstructor // Генерирует конструктор для final полей (Lombok)
 public class SecurityConfig {
-    private final JwtRequestFilter jwtRequestFilter;
-    private final AccessRestrictionHandler accessRestrictionHandler;
+    private final JwtRequestFilter jwtRequestFilter; // Кастомный JWT-фильтр для проверки токенов
+    private final AccessRestrictionHandler accessRestrictionHandler; // Обработчик отказа в доступе
 
     private static final PathPatternRequestMatcher[] NOT_SECURED_URLS = new PathPatternRequestMatcher[] {
+            // Эндпоинты аутентификации - доступны без токена
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/auth/login"),
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/auth/register"),
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/auth/refresh/token"),
 
+            // Swagger UI и документация API - доступны без токена
             PathPatternRequestMatcher.withDefaults().matcher("/v3/api-docs/**"),
             PathPatternRequestMatcher.withDefaults().matcher("/swagger-ui/**"),
             PathPatternRequestMatcher.withDefaults().matcher("/swagger-ui.html"),
@@ -45,40 +47,47 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth
+                .csrf(AbstractHttpConfigurer::disable) // Отключает CSRF защиту (для REST API)
+                .authorizeHttpRequests(auth -> auth // Настройка авторизации запросов
+                                // Разрешает все OPTIONS запросы (CORS preflight)
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                                // Разрешает доступ к URL из массива выше
                         .requestMatchers(NOT_SECURED_URLS).permitAll()
 
 //                        .requestMatchers(get("/users/all")).hasAnyAuthority(adminAccessSecurityRoles())
 //                        .requestMatchers(get("/posts/all")).hasAnyAuthority(adminAccessSecurityRoles())
+                                // Админский эндпоинт - только для ролей SUPER_ADMIN и ADMIN
                         .requestMatchers(post("/users/create")).hasAnyAuthority(adminAccessSecurityRoles())
 
+                                // Все остальные запросы требуют аутентификации
                         .anyRequest().authenticated()
                 )
-                .exceptionHandling(exceptions -> exceptions
+                .exceptionHandling(exceptions -> exceptions // Настройка обработки исключений
+                        // возвращает 401 UNAUTHORIZED при отсутствии аутентификации
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                        // Кастомный обработчик для ошибок доступа (403)
                         .accessDeniedHandler(accessRestrictionHandler)
                 )
+                // Добавляет JWT фильтр перед стандартным фильтром аутентификации
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    @Bean
+    @Bean // Создает бин для шифрования паролей (BCrypt)
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
+    @Bean // Создает провайдер аутентификации с использованием UserService
     public DaoAuthenticationProvider daoAuthenticationProvider(UserService userService) {
         DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
-        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
-        daoAuthenticationProvider.setUserDetailsService(userService);
+        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder()); // Устанавливает кодировщик паролей
+        daoAuthenticationProvider.setUserDetailsService(userService); // Устанавливает сервис для загрузки пользователей
         return daoAuthenticationProvider;
     }
 
-    @Bean
+    @Bean // Создает менеджер аутентификации
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
@@ -97,6 +106,7 @@ public class SecurityConfig {
         return PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, pattern);
     }
 
+    // Создает matcher для POST запросов по указанному пути
     private static RequestMatcher post(String pattern) {
         return PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, pattern);
     }

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.post_hub.iam_service.IamServiceApplication;
 import com.post_hub.iam_service.model.entity.User;
 import com.post_hub.iam_service.model.exception.InvalidDataException;
+import com.post_hub.iam_service.model.request.user.NewUserRequest;
+import com.post_hub.iam_service.model.request.user.UpdateUserRequest;
 import com.post_hub.iam_service.repository.UserRepository;
 import com.post_hub.iam_service.security.JwtTokenProvider;
 import lombok.Setter;
@@ -78,5 +80,78 @@ public class UserControllerTest {
                 .header(HttpHeaders.AUTHORIZATION, adminJwt)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    void getAllUsers_Unauthorized_401() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                .get("/users/all"))
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized());
+    }
+
+    @Test
+    @Transactional // откатит изменения в БД
+    void create_User_AsAdmin_OK_200() throws Exception {
+        NewUserRequest request = new NewUserRequest(
+                "newUser",
+                "password123",
+                "newuser@gmail.com");
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/users/create")
+                .header(HttpHeaders.AUTHORIZATION, adminJwt)
+                .contentType(MediaType.APPLICATION_JSON) // Этот заголовок говорит серверу, в каком формате отправлены данные в теле запроса
+                .content(objectMapper.writeValueAsBytes(request)) // Добавляет тело (body) запроса
+                .accept(MediaType.APPLICATION_JSON)) // Как и в первом тесте, ожидаем ответ от сервера в формате JSON
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    @Transactional
+    void createUser_asUser_Forbidden_403() throws Exception {
+        NewUserRequest request = new NewUserRequest(
+                "newUser",
+                "password123",
+                "newuser@gmail.com");
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/users/create")
+                        .header(HttpHeaders.AUTHORIZATION, userJwt)
+                        .contentType(MediaType.APPLICATION_JSON) // Этот заголовок говорит серверу, в каком формате отправлены данные в теле запроса
+                        .content(objectMapper.writeValueAsBytes(request)) // Добавляет тело (body) запроса
+                        .accept(MediaType.APPLICATION_JSON)) // Как и в первом тесте, ожидаем ответ от сервера в формате JSON
+                .andExpect(MockMvcResultMatchers.status().isForbidden());
+    }
+
+    @Test
+    @Transactional
+    void updateUser_asAdmin_OK_200() throws Exception {
+        UpdateUserRequest request = new UpdateUserRequest("updates_username", "updatedUser@gmail.com");
+
+        mockMvc.perform(MockMvcRequestBuilders.put("/users/update/1")
+                .header(HttpHeaders.AUTHORIZATION, adminJwt)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsBytes(request))
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+
+    }
+
+    @Test
+    @Transactional
+    void deleteUser_asAdmin_OK_200() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.delete("/users/delete/1")
+                .header(HttpHeaders.AUTHORIZATION, adminJwt)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    @Transactional
+    void deleteUser_asUser_Forbidden_403() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.delete("/users/delete/1")
+                        .header(HttpHeaders.AUTHORIZATION, userJwt)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isForbidden());
     }
 }
