@@ -132,6 +132,11 @@
 			<artifactId>mockito-core</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- Kafka (Позволит использовать producer и consumer прямо в коде) -->
+		<dependency>
+			<groupId>org.springframework.kafka</groupId>
+			<artifactId>spring-kafka</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
